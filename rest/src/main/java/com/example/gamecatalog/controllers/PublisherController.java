@@ -6,15 +6,17 @@ import com.example.gamecatalog.api.operations.publisher.deletePublisher.DeletePu
 import com.example.gamecatalog.api.operations.publisher.deletePublisher.DeletePublisherResponse;
 import com.example.gamecatalog.api.operations.publisher.getAllPublishers.GetAllPublishersRequest;
 import com.example.gamecatalog.api.operations.publisher.getAllPublishers.GetAllPublishersResponse;
+import com.example.gamecatalog.api.operations.publisher.getAllPublishersByGame.GetAllPublishersByGameRequest;
+import com.example.gamecatalog.api.operations.publisher.getAllPublishersByGame.GetAllPublishersByGameResponse;
 import com.example.gamecatalog.api.operations.publisher.getPublisher.GetPublisherRequest;
 import com.example.gamecatalog.api.operations.publisher.getPublisher.GetPublisherResponse;
 import com.example.gamecatalog.api.operations.publisher.updatePublisher.UpdatePublisherRequest;
 import com.example.gamecatalog.api.operations.publisher.updatePublisher.UpdatePublisherResponse;
 import com.example.gamecatalog.core.processors.publisher.*;
 import io.swagger.v3.oas.annotations.Operation;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.UUID;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,12 +32,13 @@ public class PublisherController {
     private final GetAllPublishersProcessor getAllPublishersProcessor;
     private final UpdatePublisherProcessor updatePublisherProcessor;
     private final DeletePublisherProcessor deletePublisherProcessor;
+    private final GetAllPublishersByGameProcessor getAllPublishersByGameProcessor;
 
     @PostMapping
     @Operation(description = "Creates a publisher by given parameters.",
               summary = "Creates a publisher.")
     public ResponseEntity<CreatePublisherResponse> createPublisher(@RequestParam String name, @RequestParam String address,
-                                                                   @RequestParam LocalDate dateOfCreation,
+                                                                   @RequestParam @DateTimeFormat LocalDate dateOfCreation,
                                                                    @RequestParam String[] games){
         return new ResponseEntity<>(this.createPublisherProcessor.process(CreatePublisherRequest.builder()
                         .name(name)
@@ -66,7 +69,7 @@ public class PublisherController {
     @Operation(description = "Updates a publishers by given parameters.",
                summary = "Updates a publisher.")
     public ResponseEntity<UpdatePublisherResponse> updatePublisher(@RequestParam @UUID String publisherId,@RequestParam String name,
-                                                                   @RequestParam String address, @RequestParam LocalDate dateOfCreation,
+                                                                   @RequestParam String address, @RequestParam @DateTimeFormat LocalDate dateOfCreation,
                                                                    @RequestParam String[] games){
         return new ResponseEntity<>(this.updatePublisherProcessor.process(UpdatePublisherRequest.builder()
                         .publisherId(publisherId)
@@ -84,5 +87,20 @@ public class PublisherController {
         return new ResponseEntity<>(this.deletePublisherProcessor.process(DeletePublisherRequest.builder()
                         .publisherId(publisherId)
                 .build()),HttpStatus.OK);
+    }
+
+    @GetMapping(path="/publishers/game")
+    public ResponseEntity<GetAllPublishersByGameResponse> getAllPublisherByGame(@RequestParam @UUID String gameId,
+                                                                               @RequestParam Integer startPage,
+                                                                               @RequestParam Integer size){
+        return new ResponseEntity<>(this.getAllPublishersByGameProcessor
+                .process(GetAllPublishersByGameRequest.builder()
+                        .gameId(gameId)
+                        .size(size)
+                        .startPage(startPage)
+                        .build())
+
+                ,HttpStatus.OK);
+
     }
 }
