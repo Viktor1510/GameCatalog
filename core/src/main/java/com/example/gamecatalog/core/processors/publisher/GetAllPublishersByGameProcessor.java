@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.awt.print.Pageable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -34,9 +35,9 @@ public class GetAllPublishersByGameProcessor implements GetAllPublishersByGameOp
   try {
    Game game=gameRepository.findById(UUID.fromString(request.getGameId()))
            .orElseThrow(()->new GameNotFoundException("Game not found!"));
-   Pageable pageable = (Pageable) PageRequest.of(request.getStartPage(), request.getSize(),
+   org.springframework.data.domain.Pageable pageable = (org.springframework.data.domain.Pageable) PageRequest.of(request.getStartPage(), request.getSize(),
            Sort.by("name").ascending());
-   Page<Publisher> publisher = publisherRepository.findPublisherByGames((Set<Game>) game, pageable);
+   Page<Publisher> publisher = publisherRepository.findByGamesIn(Collections.singleton((Set<Game>) game), pageable);
 
    List<PublisherByGameItem> publisherResponses = publisher.getContent().stream()
            .map(this::mapGameToSingleItem)

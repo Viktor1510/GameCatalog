@@ -7,10 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.awt.print.Pageable;
+import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 @Repository
 public interface PublisherRepository extends JpaRepository<Publisher, UUID> {
-    Page<Publisher> findPublisherByGames(Set<Game> game, Pageable pageable);
+    Page<Publisher> findByGamesIn(Collection<Set<Game>> games, org.springframework.data.domain.Pageable pageable);
 
 }
